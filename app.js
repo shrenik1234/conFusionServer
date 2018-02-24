@@ -15,19 +15,19 @@ const mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 
 const Dishes = require('./models/dishes');
-// Connection URL
-const url = 'mongodb://localhost:27017/conFusion';
+const Promotions = require('./models/promotions');
+const Leaders = require('./models/leaders');
 
-//Removed "useMongoClient" from here because of the new version of Mongoose npm
+// Connection URL for the data base
+const url = 'mongodb://localhost:27017/conFusion';
 const connect = mongoose.connect(url);
 
 connect.then((db) => {
-    console.log("Connected correctly to server");
-    //Added for the new version of Mongoose
     var db = mongoose.connection;
+    console.log("Connected correctly to server");
 }, (err) => { console.log(err); });
 
-
+// Initiate the Express app
 var app = express();
 
 // view engine setup
