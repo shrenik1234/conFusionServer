@@ -1,5 +1,6 @@
 {
-  "dishes": [{
+  "dishes": [
+    {
       "name": "Uthappizza",
       "image": "images/uthappizza.png",
       "category": "mains",
