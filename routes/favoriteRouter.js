@@ -66,14 +66,29 @@ favoriteRouter.route('/')
   .catch((err) => next(err));
 })
 .delete(cors.corsWithOptions, authenticate.verifyUser,(req, res, next) => {
-    Favorites.remove({})
-    .then((resp) => {
+  Favorites.findOne({"user":req.user._id})
+  .then((fav) => {
+    if (fav != null) {              // If favorites are already added
+        fav.remove();
+        fav.save()
+          .then((fav) => {
+              console.log('Favorites Added', fav);
+              res.statusCode = 200;
+              res.setHeader('Content-Type', 'application/json');
+              res.json(fav);
+          }, (err) => next(err))
+          .catch((err) => next(err));
+    }
+    else{
+        console.log('No Favorites added to delete:', fav);
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-        res.json(resp);
-    }, (err) => next(err))
-    .catch((err) => next(err));
+        res.json(fav);
+    }
+  }, (err) => next(err))
+  .catch((err) => next(err));
 });
+
 
 favoriteRouter.route('/:dishId')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -118,14 +133,28 @@ favoriteRouter.route('/:dishId')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.delete(cors.corsWithOptions, authenticate.verifyUser,authenticate.verifyAdmin,(req, res, next) => {
-    Favorites.findByIdAndRemove(req.params.dishId)
-    .then((resp) => {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json(resp);
-    }, (err) => next(err))
-    .catch((err) => next(err));
+.delete(cors.corsWithOptions, authenticate.verifyUser,(req, res, next) => {
+  Favorites.findOne({"user":req.user._id})
+  .then((fav) => {
+      if (fav != null) {
+
+        if(fav.dishes.indexOf(req.params.dishId) > -1){
+          fav.dishes.splice(fav.dishes.indexOf(req.params.dishId),1);
+        }
+          fav.save()
+          .then((fav) => {
+              res.statusCode = 200;
+              res.setHeader('Content-Type', 'application/json');
+              res.json(fav);
+          }, (err) => next(err));
+      }
+      else {
+          err = new Error('No favourite dishes added for this user to delete dish!');
+          err.status = 404;
+          return next(err);
+      }
+  }, (err) => next(err))
+  .catch((err) => next(err));
 });
 
 module.exports = favoriteRouter;
